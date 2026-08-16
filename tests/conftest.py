@@ -9,15 +9,19 @@ import json
 from pathlib import Path
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.database import AsyncSessionLocal
 
 GOLDEN_SET_PATH = Path(__file__).parent / "golden_set.json"
 
 
 @pytest.fixture
-async def db_session() -> AsyncSession:
+async def db_session():
+    # Imported here, not at module level: conftest.py loads for every test
+    # file in tests/, so a module-level import would make app.database's
+    # eager Settings()/engine construction (needs DATABASE_URL) a hard
+    # requirement even for test_citation_guard.py, which touches no DB at
+    # all - confirmed as a real CI failure, not a hypothetical.
+    from app.database import AsyncSessionLocal
+
     async with AsyncSessionLocal() as session:
         yield session
 
