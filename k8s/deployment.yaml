@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netconfig-assistant
+  labels:
+    app: netconfig-assistant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netconfig-assistant
+  template:
+    metadata:
+      labels:
+        app: netconfig-assistant
+    spec:
+      containers:
+        - name: netconfig-assistant
+          image: netconfig-assistant:k8s
+          # Never pulls: the image is loaded straight into minikube's
+          # container runtime (`minikube image load`), not pushed to a
+          # registry - this is local dev, not a deployment target.
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: netconfig-assistant-config
+            - secretRef:
+                name: netconfig-assistant-secret
+          # /health only checks the process is up, not that Postgres is
+          # reachable (main.py's lifespan already fails startup hard if the
+          # DB is unreachable, so a crash-looping pod IS the signal for
+          # that case) - readiness/liveness both point at it since there's
+          # no deeper check to make yet.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

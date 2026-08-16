@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netconfig-assistant-config
+data:
+  # Non-secret settings.Config values live here; DATABASE_URL and
+  # ANTHROPIC_API_KEY go in the Secret instead (see secret.example.yaml) -
+  # same split as ConfigMap vs Secret is meant for.
+  APP_NAME: "Network Configuration Assistant"
+  EMBEDDING_MODEL: "BAAI/bge-small-en-v1.5"
+  EMBEDDING_DIM: "384"
+  DEBUG: "false"

@@ -9,3 +9,5 @@ venv/
 .terraform/
 .pytest_cache/
 *.egg-info/
+build/
+k8s/secret.yaml
