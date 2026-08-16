@@ -1,0 +1,42 @@
+name: ci
+
+# Everything that costs nothing to run: no Anthropic API calls, no Postgres.
+# Kept separate from evals.yml so a typo is caught in under a minute without
+# spending a single API call - same split as growth-os's ci.yml/evals.yml.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install ".[dev]"
+
+      # These modules' demo()/self-check blocks exercise real assertions
+      # against known-good and known-bad inputs (e.g. citation_guard's
+      # adversarial "one real + one fabricated citation must still fail"
+      # case) - catches a broken gate here, not by silently passing evals.
+      - name: Module self-checks
+        run: |
+          python -m app.services.chunker
+          python -m app.services.citation_guard
+          python -m app.services.cost
+
+      # The only pytest file that needs neither a live DB nor the API -
+      # test_rag_triad.py needs both and lives in evals.yml instead.
+      - name: Structural citation tests
+        run: python -m pytest tests/test_citation_guard.py -v

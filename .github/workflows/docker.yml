@@ -1,0 +1,98 @@
+name: docker
+
+# Builds the image on every relevant push so the Dockerfile cannot rot
+# unnoticed. No registry push: this is a build-and-smoke-test artifact, not
+# a deployment - same as growth-os's docker.yml.
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - "pyproject.toml"
+      - "app/**"
+      - ".github/workflows/docker.yml"
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: netconfig
+          POSTGRES_PASSWORD: devpassword
+          POSTGRES_DB: netconfig
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U netconfig"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: netconfig-assistant:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # pgvector's extension isn't auto-created by the image - same real
+      # finding as evals.yml. The app's own lifespan create_all would
+      # otherwise fail on the vector column type.
+      - name: Create pgvector extension
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends postgresql-client
+          PGPASSWORD=devpassword psql -h localhost -U netconfig -d netconfig -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+      # The image is only useful if it actually serves. No ANTHROPIC_API_KEY
+      # here on purpose: /health doesn't touch the model, proving the image
+      # boots and reaches Postgres without needing a paid secret.
+      - name: Smoke test the container
+        run: |
+          docker run -d --name netconfig-ci -p 8000:8000 \
+            -e DATABASE_URL=postgresql+asyncpg://netconfig:devpassword@localhost:5432/netconfig \
+            netconfig-assistant:ci
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null http://127.0.0.1:8000/health; then
+              echo "container served /health on attempt $i"
+              docker rm -f netconfig-ci
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::container never served a 200 on /health"
+          docker logs netconfig-ci
+          docker rm -f netconfig-ci
+          exit 1
+
+      # Guards the boundary .dockerignore is supposed to enforce: neither
+      # the API key nor the source RFC corpus should ever end up in a layer.
+      - name: Assert no secrets or corpus baked into the image
+        run: |
+          if docker run --rm --entrypoint sh netconfig-assistant:ci -c '[ -f /app/.env ]'; then
+            echo "::error::.env is present inside the image"
+            exit 1
+          fi
+          if docker run --rm --entrypoint sh netconfig-assistant:ci -c '[ -d /app/corpus ]'; then
+            echo "::error::the corpus directory is baked into the image"
+            exit 1
+          fi
+          echo "clean: no .env, no corpus"

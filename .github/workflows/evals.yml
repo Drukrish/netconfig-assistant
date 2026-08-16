@@ -1,0 +1,91 @@
+name: evals
+
+# Live inference against the human-reviewed golden set, over a real
+# ephemeral Postgres - a fixture-only eval gate can't catch retrieval or
+# model-behaviour drift, which is most of what this exists to catch.
+on:
+  push:
+    branches: ["**"]
+    # Cost containment: unrelated edits (README, terraform, k8s manifests)
+    # must not trigger paid inference.
+    paths:
+      - "app/**"
+      - "corpus/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - ".github/workflows/evals.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - "corpus/**"
+      - "tests/**"
+  workflow_dispatch:
+
+concurrency:
+  group: evals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: netconfig
+          POSTGRES_PASSWORD: devpassword
+          POSTGRES_DB: netconfig
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U netconfig"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://netconfig:devpassword@localhost:5432/netconfig
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      # Ceiling stays modest in CI on purpose - this workflow can run on
+      # every push to app/**, so a runaway loop must not be free to spend
+      # past what one eval run is expected to cost.
+      SPEND_CEILING_USD: "5"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install ".[dev]"
+
+      # Fail loudly and immediately rather than letting the suite produce a
+      # wall of confusing 401s.
+      - name: Require API key
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::ANTHROPIC_API_KEY secret is not set. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      # pgvector's extension isn't auto-created by the image - confirmed the
+      # hard way locally (see ContentHandoff.md). Must run before ingest's
+      # create_all, which creates a column of the vector type.
+      - name: Create pgvector extension
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends postgresql-client
+          PGPASSWORD=devpassword psql -h localhost -U netconfig -d netconfig -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+      - name: Ingest corpus
+        run: python -m app.services.ingest
+
+      # Free layer first - proves the structural gate can still fail before
+      # trusting a green run of the paid suite below.
+      - name: Structural citation self-check
+        run: python -m app.services.citation_guard
+
+      - name: Run full eval suite
+        run: python -m pytest tests/ -v
