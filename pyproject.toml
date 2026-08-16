@@ -26,3 +26,9 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+# Session-scoped, not the pytest-asyncio default of one new loop per test
+# function: app.database's async engine (and its asyncpg connection pool) is
+# created once at module-import time. A fresh loop per test invalidates that
+# pool's connections after the first test closes its loop - real bug, found
+# by the first full-suite run cascading InterfaceError from test 2 onward.
+asyncio_default_fixture_loop_scope = "session"

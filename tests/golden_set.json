@@ -1,0 +1,242 @@
+[
+  {
+    "id": 1,
+    "rfc_number": "2131",
+    "citation": "RFC 2131 §1",
+    "heading": "Introduction",
+    "question": "What are the three DHCP IP address allocation mechanisms, and how do they differ?",
+    "expected_citations": [
+      "RFC 2131 §1"
+    ],
+    "source_excerpt": "The Dynamic Host Configuration Protocol (DHCP) provides configuration\n   parameters to Internet hosts.  DHCP consists of two components: a\n   protocol for delivering host-specific configuration parameters from a\n   DHCP server to a host and a mechanism for allocation of network\n   addresses to hosts",
+    "reviewed": true
+  },
+  {
+    "id": 2,
+    "rfc_number": "2131",
+    "citation": "RFC 2131 §3.3",
+    "heading": "Interpretation and representation of time values",
+    "question": "Why are DHCP lease times sent as relative values instead of absolute timestamps?",
+    "expected_citations": [
+      "RFC 2131 §3.3"
+    ],
+    "source_excerpt": "A client acquires a lease for a network address for a fixed period of\n   time (which may be infinite).  Throughout the protocol, times are to\n   be represented in units of seconds.  The time value of 0xffffffff is\n   reserved to represent \"infinity\".\n\n   As clients and servers may not have synchroni",
+    "reviewed": true
+  },
+  {
+    "id": 3,
+    "rfc_number": "2131",
+    "citation": "RFC 2131 §4.3.5",
+    "heading": "DHCPINFORM message",
+    "question": "When replying to a DHCPINFORM, should the server set yiaddr or a lease time?",
+    "expected_citations": [
+      "RFC 2131 §4.3.5"
+    ],
+    "source_excerpt": "The server responds to a DHCPINFORM message by sending a DHCPACK\n   message directly to the address given in the 'ciaddr' field of the\n   DHCPINFORM message.  The server MUST NOT send a lease expiration time\n   to the client and SHOULD NOT fill in 'yiaddr'.  The server includes\n   other parameters i",
+    "reviewed": true
+  },
+  {
+    "id": 4,
+    "rfc_number": "2328",
+    "citation": "RFC 2328 §1",
+    "heading": "Introduction",
+    "question": "What is the difference between OSPF's NBMA and Point-to-MultiPoint modes on non-broadcast networks?",
+    "expected_citations": [
+      "RFC 2328 §1"
+    ],
+    "source_excerpt": "This document is a specification of the Open Shortest Path First\n    (OSPF) TCP/IP internet routing protocol.  OSPF is classified as an\n    Interior Gateway Protocol (IGP).  This means that it distributes\n    routing information between routers belonging to a single Autonomous\n    System.  The OSPF ",
+    "reviewed": true
+  },
+  {
+    "id": 5,
+    "rfc_number": "2827",
+    "citation": "RFC 2827 §1",
+    "heading": "Introduction",
+    "question": "Does ingress filtering stop DoS floods from legitimate source addresses too?",
+    "expected_citations": [
+      "RFC 2827 §1"
+    ],
+    "source_excerpt": "A resurgence of Denial of Service Attacks [1] aimed at various\n   targets in the Internet have produced new challenges within the\n   Internet Service Provider (ISP) and network security communities to\n   find new and innovative methods to mitigate these types of attacks.\n   The difficulties in reach",
+    "reviewed": true
+  },
+  {
+    "id": 6,
+    "rfc_number": "3022",
+    "citation": "RFC 3022 §1",
+    "heading": "Introduction",
+    "question": "Why must all packets in a NAT session traverse the same NAT router?",
+    "expected_citations": [
+      "RFC 3022 §1"
+    ],
+    "source_excerpt": "The need for IP Address translation arises when a network's internal\n   IP addresses cannot be used outside the network either for privacy\n   reasons or because they are invalid for use outside the network.\n\n   Network topology outside a local domain can change in many ways.\n   Customers may change ",
+    "reviewed": true
+  },
+  {
+    "id": 7,
+    "rfc_number": "3022",
+    "citation": "RFC 3022 §4.4",
+    "heading": "FTP support",
+    "question": "Why does an FTP ALG need to adjust TCP sequence and acknowledgment numbers?",
+    "expected_citations": [
+      "RFC 3022 §4.4"
+    ],
+    "source_excerpt": "One of the most popular applications, \"FTP\" ([FTP]) would require an\n   ALG to monitor the control session payload to determine the ensuing\n   data session parameters.  FTP ALG is an integral part of most NAT\n   implementations.\n\n   The FTP ALG would require a special table to correct the TCP sequen",
+    "reviewed": true
+  },
+  {
+    "id": 8,
+    "rfc_number": "3411",
+    "citation": "RFC 3411 §1.1",
+    "heading": "Overview",
+    "question": "Which section defines the abstract service interface primitives between SNMP subsystems and models?",
+    "expected_citations": [
+      "RFC 3411 §1.1"
+    ],
+    "source_excerpt": "This document defines a vocabulary for describing SNMP Management\n   Frameworks, and an architecture for describing the major portions of\n   SNMP Management Frameworks.\n\n   This document does not provide a general introduction to SNMP.  Other\n   documents and books can provide a much better introduc",
+    "reviewed": true
+  },
+  {
+    "id": 9,
+    "rfc_number": "3411",
+    "citation": "RFC 3411 §2.5",
+    "heading": "Message Processing",
+    "question": "How is an SNMP message version typically identified in the message header?",
+    "expected_citations": [
+      "RFC 3411 §2.5"
+    ],
+    "source_excerpt": "A Message Processing Model document defines a message format, which\n   is typically identified by a version field in an SNMP message header.\n   The document may also define a MIB module for use in message\n   processing and for instrumentation of version-specific interactions.\n\n   An SNMP engine incl",
+    "reviewed": true
+  },
+  {
+    "id": 10,
+    "rfc_number": "3411",
+    "citation": "RFC 3411 §2.14",
+    "heading": "SNMP Framework Documents",
+    "question": "What is the difference between a 'subsystem', a 'model', and an 'implementation' in SNMP architecture?",
+    "expected_citations": [
+      "RFC 3411 §2.14"
+    ],
+    "source_excerpt": "This architecture is designed to allow an orderly evolution of\n   portions of SNMP Frameworks.\n\n   Throughout the rest of this document, the term \"subsystem\" refers to\n   an abstract and incomplete specification of a portion of a Framework,\n   that is further refined by a model specification.\n\n\n\nHar",
+    "reviewed": true
+  },
+  {
+    "id": 11,
+    "rfc_number": "3411",
+    "citation": "RFC 3411 §3.1.2",
+    "heading": "Access Control Subsystem",
+    "question": "How many Access Control Models can the Access Control Subsystem support simultaneously?",
+    "expected_citations": [
+      "RFC 3411 §3.1.2"
+    ],
+    "source_excerpt": "The Access Control Subsystem provides authorization services by means\n   of one or more (*) Access Control Models.\n\n   +------------------------------------------------------------------+\n   |                                                                  |\n   |  Access Control Subsystem          ",
+    "reviewed": true
+  },
+  {
+    "id": 12,
+    "rfc_number": "3411",
+    "citation": "RFC 3411 §3.4.2",
+    "heading": "Local Configuration Datastore",
+    "question": "What are the three SNMP securityLevel values and how are they ordered?",
+    "expected_citations": [
+      "RFC 3411 §3.4.2"
+    ],
+    "source_excerpt": "The subsystems, models, and applications within an SNMP entity may\n   need to retain their own sets of configuration information.\n\n   Portions of the configuration information may be accessible as\n   managed objects.\n\n   The collection of these sets of information is referred to as an\n   entity's Lo",
+    "reviewed": true
+  },
+  {
+    "id": 13,
+    "rfc_number": "3411",
+    "citation": "RFC 3411 §4.2.2",
+    "heading": "Prepare an Outgoing SNMP Response Message",
+    "question": "What input and output parameters does prepareResponseMessage use to build an SNMP response?",
+    "expected_citations": [
+      "RFC 3411 §4.2.2"
+    ],
+    "source_excerpt": "The Message Processing Subsystem provides this service primitive for\n   preparing an outgoing SNMP Response Message:\n\n   result =                         -- SUCCESS or FAILURE\n     prepareResponseMessage(\n     IN   messageProcessingModel    -- typically, SNMP version\n     IN   securityModel         ",
+    "reviewed": true
+  },
+  {
+    "id": 14,
+    "rfc_number": "3411",
+    "citation": "RFC 3411 §4.6.2",
+    "heading": "Scenario Diagram for a Command Responder Application",
+    "question": "After processPdu, which primitive does the Command Responder call to send its Response PDU back?",
+    "expected_citations": [
+      "RFC 3411 §4.6.2"
+    ],
+    "source_excerpt": "This diagram shows how a Command Responder or Notification Receiver\n   application registers for handling a pduType, how a PDU is dispatched\n   to the application after an SNMP message is received, and how the\n   Response is (asynchronously) send back to the network.\n\n   Command               Dispat",
+    "reviewed": true
+  },
+  {
+    "id": 15,
+    "rfc_number": "4271",
+    "citation": "RFC 4271 §1",
+    "heading": "Introduction",
+    "question": "What forwarding paradigm limits the routing policies BGP can enforce?",
+    "expected_citations": [
+      "RFC 4271 §1"
+    ],
+    "source_excerpt": "The Border Gateway Protocol (BGP) is an inter-Autonomous System\n   routing protocol.\n\n   The primary function of a BGP speaking system is to exchange network\n   reachability information with other BGP systems.  This network\n   reachability information includes information on the list of\n   Autonomou",
+    "reviewed": true
+  },
+  {
+    "id": 16,
+    "rfc_number": "4271",
+    "citation": "RFC 4271 §4.3",
+    "heading": "UPDATE Message Format",
+    "question": "How do I calculate the NLRI field length in a BGP UPDATE message?",
+    "expected_citations": [
+      "RFC 4271 §4.3"
+    ],
+    "source_excerpt": "UPDATE messages are used to transfer routing information between BGP\n   peers.  The information in the UPDATE message can be used to\n   construct a graph that describes the relationships of the various\n   Autonomous Systems.  By applying rules to be discussed, routing\n\n\n\nRekhter, et al.             ",
+    "reviewed": true
+  },
+  {
+    "id": 17,
+    "rfc_number": "4271",
+    "citation": "RFC 4271 §5.1.7",
+    "heading": "AGGREGATOR",
+    "question": "What AS number and IP address should the AGGREGATOR attribute contain?",
+    "expected_citations": [
+      "RFC 4271 §5.1.7"
+    ],
+    "source_excerpt": "AGGREGATOR is an optional transitive attribute, which MAY be included\n   in updates that are formed by aggregation (see Section 9.2.2.2).  A\n   BGP speaker that performs route aggregation MAY add the AGGREGATOR\n   attribute, which SHALL contain its own AS number and IP address.  The\n   IP address SH",
+    "reviewed": true
+  },
+  {
+    "id": 18,
+    "rfc_number": "4271",
+    "citation": "RFC 4271 §7",
+    "heading": "BGP Version Negotiation",
+    "question": "How do BGP speakers determine the highest common protocol version if OPEN negotiation fails?",
+    "expected_citations": [
+      "RFC 4271 §7"
+    ],
+    "source_excerpt": "BGP speakers MAY negotiate the version of the protocol by making\n   multiple attempts at opening a BGP connection, starting with the\n   highest version number each BGP speaker supports.  If an open attempt\n   fails with an Error Code, OPEN Message Error, and an Error Subcode,\n   Unsupported Version ",
+    "reviewed": true
+  },
+  {
+    "id": 19,
+    "rfc_number": "4271",
+    "citation": "RFC 4271 §8.2.1.4",
+    "heading": "FSM Event Numbers",
+    "question": "Are BGP FSM event numbers 1-28 mandatory to implement identically across implementations?",
+    "expected_citations": [
+      "RFC 4271 §8.2.1.4"
+    ],
+    "source_excerpt": "The Event numbers (1-28) utilized in this state machine description\n   aid in specifying the behavior of the BGP state machine.\n   Implementations MAY use these numbers to provide network management\n   information.  The exact form of an FSM or the FSM events are specific\n   to each implementation.",
+    "reviewed": true
+  },
+  {
+    "id": 20,
+    "rfc_number": "4271",
+    "citation": "RFC 4271 §9.1.4",
+    "heading": "Overlapping Routes",
+    "question": "If a router accepts overlapping routes, what must the Decision Process install in Loc-RIB?",
+    "expected_citations": [
+      "RFC 4271 §9.1.4"
+    ],
+    "source_excerpt": "A BGP speaker may transmit routes with overlapping Network Layer\n   Reachability Information (NLRI) to another BGP speaker.  NLRI overlap\n   occurs when a set of destinations are identified in non-matching\n   multiple routes.  Because BGP encodes NLRI using IP prefixes, overlap\n   will always exhibi",
+    "reviewed": true
+  }
+]

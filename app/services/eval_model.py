@@ -63,7 +63,13 @@ class ClaudeJudge(DeepEvalBaseLLM):
                 f"\n\nRespond with ONLY a JSON object matching this schema, no prose: "
                 f"{schema.model_json_schema()}"
             )
-        raw = await call_claude(full_prompt, max_tokens=1500, model=self.model_name)
+        # 1500 truncated the faithfulness metric's "truths" extraction on the
+        # first live run; 4000 still truncated it on a dense SNMP chunk on
+        # the second run (same bug class as growth-os's HOOKS_MAX_TOKENS
+        # finding - judge output cut off mid-string). 8000 matches
+        # growth-os's own proven ceiling for this exact bug rather than
+        # guessing a third number.
+        raw = await call_claude(full_prompt, max_tokens=8000, model=self.model_name, role="judge")
         if schema is None:
             return raw
         return schema.model_validate(_extract_json(raw))
