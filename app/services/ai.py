@@ -6,6 +6,7 @@ error handling, same "fail loud if the key is missing" behaviour.
 import httpx
 
 from app.config import settings
+from app.services.cost import Usage, check_spend_ceiling, record_llm_call
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -21,9 +22,13 @@ def ai_enabled() -> bool:
     return bool(settings.anthropic_api_key)
 
 
-async def call_claude(prompt: str, max_tokens: int = 2000, model: str = "claude-sonnet-5") -> str:
+async def call_claude(
+    prompt: str, max_tokens: int = 2000, model: str = "claude-sonnet-5", role: str = "unspecified"
+) -> str:
     if not settings.anthropic_api_key:
         raise RuntimeError("AI mode is off — add ANTHROPIC_API_KEY to .env and restart the server.")
+
+    await check_spend_ceiling()
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         res = await client.post(
@@ -52,4 +57,16 @@ async def call_claude(prompt: str, max_tokens: int = 2000, model: str = "claude-
     text = "\n".join(block["text"] for block in data.get("content", []) if block.get("type") == "text" and block.get("text"))
     if not text.strip():
         raise RuntimeError("The model returned an empty reply — try again.")
+
+    raw_usage = data.get("usage", {})
+    await record_llm_call(
+        role=role,
+        model=model,
+        usage=Usage(
+            input_tokens=raw_usage.get("input_tokens", 0),
+            output_tokens=raw_usage.get("output_tokens", 0),
+            cache_creation_tokens=raw_usage.get("cache_creation_input_tokens", 0),
+            cache_read_tokens=raw_usage.get("cache_read_input_tokens", 0),
+        ),
+    )
     return text

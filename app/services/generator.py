@@ -70,7 +70,7 @@ async def answer_question(session: AsyncSession, query: str, k: int = 5) -> Answ
         )
 
     prompt = _build_prompt(query, retrieved)
-    raw = await call_claude(prompt, max_tokens=1500)
+    raw = await call_claude(prompt, max_tokens=1500, role="generator")
 
     try:
         parsed = _extract_json(raw)

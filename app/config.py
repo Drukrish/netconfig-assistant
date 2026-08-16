@@ -21,6 +21,13 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str = ""  # empty means generation endpoints 503
 
+    # Refuses new Claude calls once cumulative recorded spend (app.services.cost)
+    # hits this - a real safety net after a suite run silently drained a real
+    # balance with no warning. Approximate, not real-time metering: checked
+    # BEFORE each call using spend recorded so far, since a call's own cost
+    # isn't known until its response comes back.
+    spend_ceiling_usd: float = 15.0
+
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     embedding_dim: int = 384
 
