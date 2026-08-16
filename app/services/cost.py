@@ -12,9 +12,14 @@ from dataclasses import dataclass
 
 from sqlalchemy import func, select
 
-from app.config import settings
-from app.database import AsyncSessionLocal
 from app.models.llm_run import LlmRun
+
+# app.config and app.database are imported inside the functions that need
+# them, not at module level: both eagerly construct Settings()/the async
+# engine from DATABASE_URL at import time, which would make importing this
+# module - even just to run demo()'s pure cost-math self-check - require a
+# live DB config. Confirmed as a real failure, not a hypothetical: ci.yml's
+# free, DB-less job broke on exactly this the first time this file shipped.
 
 
 class SpendCeilingExceeded(RuntimeError):
@@ -95,6 +100,8 @@ class run:
 
 
 async def total_spend_usd() -> float:
+    from app.database import AsyncSessionLocal
+
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(func.coalesce(func.sum(LlmRun.cost_usd), 0.0)))
         return float(result.scalar_one())
@@ -103,6 +110,8 @@ async def total_spend_usd() -> float:
 async def check_spend_ceiling() -> None:
     """Called before every Claude request, not after - the point is refusing
     the call, not reporting the overspend once it's already happened again."""
+    from app.config import settings
+
     spent = await total_spend_usd()
     if spent >= settings.spend_ceiling_usd:
         raise SpendCeilingExceeded(
@@ -115,6 +124,8 @@ async def check_spend_ceiling() -> None:
 async def record_llm_call(role: str, model: str, usage: Usage) -> None:
     """Record one API call. Never raises: a failed cost write must not kill
     a generation the caller is waiting on."""
+    from app.database import AsyncSessionLocal
+
     try:
         current = _run_context.get()
         run_id, run_label = current if current else (str(uuid.uuid4()), role)
