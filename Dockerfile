@@ -1,11 +1,18 @@
 # Two stages: install deps in a builder layer, copy only the installed
 # packages + app code into a slim runtime layer. Mirrors growth-os's
-# Dockerfile pattern (deps/build/runner split, secrets never baked in) -
-# same discipline, different language's version of "multi-stage."
-
+# Dockerfile pattern (secrets never baked in, non-root runtime user) - but
+# NOT its deps/build split at the copy level: npm can install from
+# package.json alone, while `pip install .` builds the local package's own
+# wheel, which pyproject.toml's explicit `packages = ["app", ...]` (see its
+# comment) requires actually existing on disk. Copying pyproject.toml alone
+# here fails with "package directory 'app' does not exist" - confirmed by a
+# real CI build failure, not anticipated. app/ has to be present before
+# `pip install .` runs, so the layer-cache boundary sits after that install
+# instead of before it.
 FROM python:3.12-slim AS builder
 WORKDIR /app
 COPY pyproject.toml ./
+COPY app ./app
 # No lockfile in this project (see pyproject.toml) - pip install . resolves
 # from the dependencies list directly, same as a local dev install.
 RUN pip install --no-cache-dir --prefix=/install .
