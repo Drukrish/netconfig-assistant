@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars (already gitignored, same as .env) and fill in
+# real values. Never commit terraform.tfvars or any *.tfstate* file - state
+# can hold db_password in plaintext.
+
+db_password  = "replace-with-a-real-password"
+allowed_cidr = "YOUR.IP.HERE/32" # find yours: curl ifconfig.me
