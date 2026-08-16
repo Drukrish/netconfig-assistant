@@ -1,0 +1,25 @@
+# Keeps secrets and unneeded weight out of the build context AND out of the
+# image - same boundary growth-os drew: exclude here, don't trust the
+# Dockerfile's COPY list to be careful.
+.env
+.env.*
+
+# Corpus is a one-off ingest input (python -m app.services.ingest against a
+# live Postgres), not something the serving container reads at runtime -
+# queries hit Postgres, not these files.
+corpus
+
+.git
+.gitignore
+.pytest_cache
+.deepeval
+__pycache__
+*.pyc
+.venv
+venv
+
+Dockerfile
+.dockerignore
+docs
+scripts
+tests
