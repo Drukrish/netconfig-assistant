@@ -65,9 +65,17 @@ jobs:
       # The image is only useful if it actually serves. No ANTHROPIC_API_KEY
       # here on purpose: /health doesn't touch the model, proving the image
       # boots and reaches Postgres without needing a paid secret.
+      #
+      # --network host is required: `localhost` inside a separately-run
+      # `docker run` container is that container's OWN loopback, not the
+      # runner host where the Postgres service container publishes its
+      # port - confirmed by a real failed run (the app crashed on startup
+      # trying to reach a Postgres that, from its point of view, wasn't
+      # there). Fine on these Linux GitHub-hosted runners; wouldn't work on
+      # Windows/Mac runners, which don't support host networking the same way.
       - name: Smoke test the container
         run: |
-          docker run -d --name netconfig-ci -p 8000:8000 \
+          docker run -d --name netconfig-ci --network host \
             -e DATABASE_URL=postgresql+asyncpg://netconfig:devpassword@localhost:5432/netconfig \
             netconfig-assistant:ci
           for i in $(seq 1 30); do
