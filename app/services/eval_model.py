@@ -63,13 +63,15 @@ class ClaudeJudge(DeepEvalBaseLLM):
                 f"\n\nRespond with ONLY a JSON object matching this schema, no prose: "
                 f"{schema.model_json_schema()}"
             )
-        # 1500 truncated the faithfulness metric's "truths" extraction on the
-        # first live run; 4000 still truncated it on a dense SNMP chunk on
-        # the second run (same bug class as growth-os's HOOKS_MAX_TOKENS
-        # finding - judge output cut off mid-string). 8000 matches
-        # growth-os's own proven ceiling for this exact bug rather than
-        # guessing a third number.
-        raw = await call_claude(full_prompt, max_tokens=8000, model=self.model_name, role="judge")
+        # 1500, then 4000, then 8000 all truncated at various points (same
+        # bug class as growth-os's HOOKS_MAX_TOKENS finding). Root cause
+        # for the worst case (golden item 19) confirmed by measuring, not
+        # guessed again: RFC 4271 SS8.2.2 (the BGP FSM description) has no
+        # numbered subsections to chunk on, so it's one 34,935-char chunk -
+        # that item's retrieved context is ~12,700 tokens, 3-4x typical,
+        # and "enumerate every fact in this context" scales with input
+        # size. 16000 gives real headroom over that measured worst case.
+        raw = await call_claude(full_prompt, max_tokens=16000, model=self.model_name, role="judge")
         if schema is None:
             return raw
         return schema.model_validate(_extract_json(raw))

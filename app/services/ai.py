@@ -30,7 +30,11 @@ async def call_claude(
 
     await check_spend_ceiling()
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    # 60s was fine for generation's 1500 max_tokens, but timed out for real
+    # on the judge's 16000-token calls (confirmed by a real ReadTimeout, not
+    # anticipated) - a large max_tokens genuinely needs a longer budget to
+    # actually finish generating, not just permission to generate that much.
+    async with httpx.AsyncClient(timeout=180.0) as client:
         res = await client.post(
             ANTHROPIC_API_URL,
             headers={
