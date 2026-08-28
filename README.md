@@ -92,12 +92,15 @@ Three layers, all real, none mocked:
 3. **Live verification scripts** (`scripts/verify_*.py`) — not part of CI,
    a documented record of first-run findings against the real API.
 
-First honest baseline: **14/19 valid trials passed** (one item's run was
-cut short by an API credit exhaustion mid-suite, one is still an open
-truncation question). Two of the five failures are the citation guard
-correctly rejecting real hallucinations; two are genuine contextual
-precision weaknesses — the correct chunk was retrieved but not ranked
-first — a concrete, measured tuning target rather than a guess.
+Final baseline: **16/20 passed (80%)**, zero unexplained failures. The 4
+that don't pass are all understood: 2 are the citation guard correctly
+rejecting real hallucinations (safety mechanism working as designed), 2
+are genuine contextual precision weaknesses — the correct chunk was
+retrieved but not ranked first — a concrete, measured tuning target
+rather than a guess. Two real infra bugs surfaced and fixed along the
+way: a judge max_tokens limit that needed to scale with actual retrieved
+context size (root cause measured directly, not guessed a third time),
+and an httpx timeout too short for the larger response that unlocked.
 
 ## Running it locally
 
@@ -121,9 +124,11 @@ hits the ceiling, rather than finding out via a failed request mid-run).
 - **Kubernetes** — Deployment/Service/ConfigMap/Secret in `k8s/`, verified
   live on a local minikube cluster (not yet deployed to a managed cluster).
 - **Terraform** (`terraform/`) — a free-tier-eligible RDS + pgvector
-  skeleton, `init`/`validate`d clean. **Not yet `apply`d** — needs AWS
-  credentials and a live confirmation the account is still inside its
-  12-month free-tier window before that happens.
+  instance, `init`/`validate`/`plan`/`apply`'d against real AWS.
+  Verified live: connected directly and confirmed a real PostgreSQL
+  16.13 instance running at the RDS endpoint, not just a green
+  Terraform apply log. Security group scoped to a single real IP,
+  not open to the world.
 - **CI/CD** — three GitHub Actions workflows (`ci`, `docker`, `evals`),
   mirroring the pattern from an earlier project. `ci` and `docker` are
   green. `evals` needs a funded Anthropic API key as a repo secret to run
@@ -132,7 +137,8 @@ hits the ceiling, rather than finding out via a failed request mid-run).
 
 ## Status
 
-Weeks 0-6 of an 8-week build are done and verified live, not just written.
-Remaining: close out the eval baseline (two items pending an API credit
-top-up), `terraform apply` against real AWS, and this README's own claims
-getting a final pass once those two are done.
+Weeks 0-7 of an 8-week build are done and verified live, not just
+written: eval baseline closed, Docker, Kubernetes (local cluster), and
+Terraform-provisioned AWS RDS all real and confirmed working, not just
+"terraform apply succeeded." Remaining: Week 8's buffer and a final pass
+on this README once nothing's left to verify.
