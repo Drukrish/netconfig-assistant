@@ -7,6 +7,8 @@ venv/
 *.tfstate
 *.tfstate.*
 .terraform/
+terraform.tfvars
+tfplan
 .pytest_cache/
 *.egg-info/
 build/
