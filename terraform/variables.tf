@@ -1,6 +1,6 @@
 variable "aws_region" {
-  type        = string
-  default     = "ap-south-1" # Mumbai - closest region, cuts cross-region latency for local testing
+  type    = string
+  default = "ap-south-1" # Mumbai - closest region, cuts cross-region latency for local testing
 }
 
 variable "db_username" {
@@ -19,4 +19,14 @@ variable "db_password" {
 variable "allowed_cidr" {
   type        = string
   description = "CIDR allowed to reach Postgres on 5432 - your own IP/32, not 0.0.0.0/0"
+}
+
+variable "anthropic_api_key" {
+  type      = string
+  sensitive = true
+  # Same discipline as db_password: no default, must come from
+  # terraform.tfvars (gitignored) or TF_VAR_anthropic_api_key. Stored in SSM
+  # as SecureString, not baked into the task definition as plaintext -
+  # anyone with ecs:DescribeTaskDefinition read access must not be able to
+  # read the key straight off it.
 }

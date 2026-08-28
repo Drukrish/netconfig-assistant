@@ -30,6 +30,17 @@ resource "aws_security_group" "rds" {
     cidr_blocks = [var.allowed_cidr]
   }
 
+  # The deployed app (ecs.tf) needs to reach this same database - referencing
+  # the ECS task's own security group here, not a second CIDR rule, means
+  # only that specific task can connect, not "anything on the app's subnet."
+  ingress {
+    description     = "Postgres from the deployed ECS app"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_app.id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
