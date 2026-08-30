@@ -123,12 +123,15 @@ hits the ceiling, rather than finding out via a failed request mid-run).
   live Postgres.
 - **Kubernetes** — Deployment/Service/ConfigMap/Secret in `k8s/`, verified
   live on a local minikube cluster (not yet deployed to a managed cluster).
-- **Terraform** (`terraform/`) — a free-tier-eligible RDS + pgvector
-  instance, `init`/`validate`/`plan`/`apply`'d against real AWS.
-  Verified live: connected directly and confirmed a real PostgreSQL
-  16.13 instance running at the RDS endpoint, not just a green
-  Terraform apply log. Security group scoped to a single real IP,
-  not open to the world.
+- **Terraform** (`terraform/`) — RDS + pgvector, plus a full ECS Fargate
+  deployment (ECR repo, SSM SecureString secrets, CloudWatch logs, IAM
+  execution role, ECS cluster/task/service), `init`/`validate`/`plan`/
+  `apply`'d against real AWS. Verified live end to end: image built and
+  pushed to ECR, ECS task running, and `GET /health` returns `200
+  {"status":"ok"}` from the task's public IP — not just a green
+  Terraform apply log. RDS security group scoped to a single real IP for
+  direct DB access; the app's security group is public on port 8000 by
+  design (portfolio/demo deployment, no ALB).
 - **CI/CD** — three GitHub Actions workflows (`ci`, `docker`, `evals`),
   mirroring the pattern from an earlier project. `ci` and `docker` are
   green. `evals` needs a funded Anthropic API key as a repo secret to run
@@ -139,6 +142,10 @@ hits the ceiling, rather than finding out via a failed request mid-run).
 
 Weeks 0-7 of an 8-week build are done and verified live, not just
 written: eval baseline closed, Docker, Kubernetes (local cluster), and
-Terraform-provisioned AWS RDS all real and confirmed working, not just
-"terraform apply succeeded." Remaining: Week 8's buffer and a final pass
-on this README once nothing's left to verify.
+the full AWS deployment (RDS + ECS Fargate) all real and confirmed
+working, not just "terraform apply succeeded." Remaining: Week 8's
+buffer and a final pass on this README once nothing's left to verify.
+
+**Cost note:** RDS + ECS Fargate are live AWS resources and cost money
+while running. Run `terraform destroy` in `terraform/` when not actively
+demoing this.
